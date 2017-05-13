@@ -1,18 +1,19 @@
 import java.util.ArrayList;
+import java.util.TreeSet;
 
-public class Member {
+public class Member implements Comparable<Member> {
 	private String name;
 	private ArrayList<Role> roles;
 	
 	public Member(String name, Role role) {
 		this.name = name;
-		this.roles = new ArrayList();
+		this.roles = new ArrayList();	
 		roles.add(role);
 	}
 		
 	public static class Role {
-		String roleName;
-		String projectName;
+		private String roleName;
+		private String projectName;
 		
 		public Role(String roleName, String projectName) {
 			this.roleName = roleName;
@@ -30,6 +31,10 @@ public class Member {
 		public String toString() {
 			return "role = " + roleName + "; project = "+ projectName;
 		}
+	}
+	@Override
+	public int compareTo(Member member) {
+		return this.getName().compareTo(member.getName());
 	}
 	
 	public ArrayList<Role> getRoles() {

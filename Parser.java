@@ -2,6 +2,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.TreeSet;
 
 //import javax.swing.text.Document;
 import javax.xml.parsers.DocumentBuilder;
@@ -24,7 +25,7 @@ import org.w3c.dom.NodeList;
 
 public class Parser {
 	public static void main(String[] args){
-		ArrayList<Member> lst = new ArrayList<Member>();
+		TreeSet<Member> set = new TreeSet();
 		try{
 			BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 			DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
@@ -46,7 +47,7 @@ public class Parser {
 							String name = mem.getAttribute("name");
 							Member.Role role = new Member.Role(roleName, projectName);
 							boolean alreadyExists = false;
-							for (Member m : lst ) {
+							for (Member m : set ) {
 								if (m.getName().equals(name)) {
 									m.addRole(role);
 									alreadyExists = true;
@@ -54,30 +55,30 @@ public class Parser {
 								}
 							}
 							if (!alreadyExists) {
-								lst.add(new Member(name, role));
+								set.add(new Member(name, role));
 							}
 						}
 					}
 				}
 			}		
 			
-			for( Member mem : lst) {
+			for( Member mem : set) {
 				System.out.println(mem);
 			}
-			createNewDoc(lst);
+			createNewDoc(set);
 		}catch(Exception e){
 			e.printStackTrace();
 		}
 		
 	}
 	
-	private static void createNewDoc(ArrayList<Member> lst) throws ParserConfigurationException, TransformerException {
+	private static void createNewDoc(TreeSet<Member> set) throws ParserConfigurationException, TransformerException {
 		DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
         Document document = documentBuilder.newDocument();
         Element rootElement = document.createElement("members");
         document.appendChild(rootElement);
-        for(Member m : lst) {
+        for(Member m : set) {
         	Element member = document.createElement("member");
         	 rootElement.appendChild(member);
         	 Attr attr = document.createAttribute("name");
