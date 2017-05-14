@@ -4,13 +4,11 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.TreeSet;
 
-//import javax.swing.text.Document;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
@@ -19,60 +17,62 @@ import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class Parser {
+	private static TreeSet<Member> set = new TreeSet<Member>();
 	public static void main(String[] args){
-		TreeSet<Member> set = new TreeSet();
 		try{
 			BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 			DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
 			f.setValidating(false);
 			DocumentBuilder builder = f.newDocumentBuilder();
-			Document doc = builder.parse(new File("K:\\eclipse_projects\\XMLParser\\src\\test.xml"));
-			doc.getDocumentElement().normalize();
-			NodeList projects = doc.getElementsByTagName("project");
-			System.out.println(projects.getLength());
-			for(int i = 0; i < projects.getLength(); ++i) {			
-				if(projects.item(i).getNodeType() == Node.ELEMENT_NODE) {
-					Element project = (Element) projects.item(i);
-					String projectName = project.getAttribute("name");
-					NodeList members = project.getChildNodes();
-					for (int j = 0 ; j < members.getLength(); ++j) {
-						if(members.item(j).getNodeType() == Node.ELEMENT_NODE) {
-							Element mem = (Element) members.item(j);
-							String roleName = mem.getAttribute("role");
-							String name = mem.getAttribute("name");
-							Member.Role role = new Member.Role(roleName, projectName);
-							boolean alreadyExists = false;
-							for (Member m : set ) {
-								if (m.getName().equals(name)) {
-									m.addRole(role);
-									alreadyExists = true;
-									break;
-								}
-							}
-							if (!alreadyExists) {
-								set.add(new Member(name, role));
-							}
-						}
-					}
-				}
-			}		
-			
-			for( Member mem : set) {
-				System.out.println(mem);
-			}
-			createNewDoc(set);
+			System.out.println("Input path to Your XML file");
+			//"K:\\eclipse_projects\\XMLParser\\src\\test.xml
+			File file = new File(reader.readLine());
+			String filePath = file.getParent();
+			Document doc = builder.parse(file);
+			parseDocument(doc);
+			createNewDoc(filePath);
 		}catch(Exception e){
 			e.printStackTrace();
 		}
 		
 	}
 	
-	private static void createNewDoc(TreeSet<Member> set) throws ParserConfigurationException, TransformerException {
+	private static void parseDocument(Document doc) {		
+		doc.getDocumentElement().normalize();
+		NodeList projects = doc.getElementsByTagName("project");
+		for(int i = 0; i < projects.getLength(); ++i) {			
+			if(projects.item(i).getNodeType() == Node.ELEMENT_NODE) {
+				Element project = (Element) projects.item(i);
+				String projectName = project.getAttribute("name");
+				NodeList members = project.getChildNodes();
+				for (int j = 0 ; j < members.getLength(); ++j) {
+					if(members.item(j).getNodeType() == Node.ELEMENT_NODE) {
+						Element mem = (Element) members.item(j);
+						String roleName = mem.getAttribute("role");
+						String name = mem.getAttribute("name");
+						Member.Role role = new Member.Role(roleName, projectName);
+						boolean alreadyExists = false;
+						for (Member m : set ) {
+							if (m.getName().equals(name)) {
+								m.addRole(role);
+								alreadyExists = true;
+								break;
+							}
+						}
+						if (!alreadyExists) {
+							set.add(new Member(name, role));
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	private static void createNewDoc(String path) throws ParserConfigurationException, TransformerException {
 		DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
         Document document = documentBuilder.newDocument();
@@ -96,9 +96,9 @@ public class Parser {
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
         transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
         DOMSource domSource = new DOMSource(document);
-        StreamResult streamResult = new StreamResult(new File("K:\\eclipse_projects\\XMLParser\\src\\result2.xml"));
+        StreamResult streamResult = new StreamResult(new File(path +"\\result.xml")); //save to the same directory
         transformer.transform(domSource,  streamResult);
-        System.out.println("Файл сохранен!");
+        System.out.println("File has been saved!");
 	}
 }
 
